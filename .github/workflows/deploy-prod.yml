@@ -1,0 +1,32 @@
+name: Deploy production
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Deploy on VPS
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.VPS_HOST }}
+                  username: ${{ secrets.VPS_USER }}
+                  key: ${{ secrets.VPS_SSH_KEY }}
+                  script: |
+                      cd ~/projets/e-radiologie-backend
+
+                      git pull origin master
+
+                      docker compose up -d --build
+
+                      docker exec e_radiologie_backend_php composer install --no-dev --optimize-autoloader
+
+                      docker exec e_radiologie_backend_php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+
+                      docker exec e_radiologie_backend_php php bin/console cache:clear --env=prod
+
+                      docker exec e_radiologie_backend_php php bin/console cache:warmup --env=prod
