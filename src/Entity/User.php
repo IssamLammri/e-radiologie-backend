@@ -53,7 +53,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * Mot de passe hashé (stocké en DB).
      * IMPORTANT : write-only (jamais renvoyé par l'API)
      */
-    #[Groups(['user:write'])]
     #[ORM\Column]
     private ?string $password = null;
 
@@ -63,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[Groups(['user:write'])]
     #[Assert\NotBlank(groups: ['user:create'])]
-    #[Assert\Length(min: 6, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
+    #[Assert\Length(min: 8, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
     private ?string $plainPassword = null;
 
     #[Groups(['user:read', 'user:write'])]
