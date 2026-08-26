@@ -1,0 +1,51 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}
+    Test email - e-Radiologie
+{% endblock %}
+
+{% block content %}
+
+    <h1 style="
+        margin: 0 0 24px;
+        color: #111827;
+        font-size: 24px;
+    ">
+        Configuration email opérationnelle ✅
+    </h1>
+
+    <p style="margin: 0 0 16px;">
+        Bonjour,
+    </p>
+
+    <p style="margin: 0 0 16px;">
+        Ceci est un email de test envoyé depuis la plateforme
+        <strong>e-Radiologie</strong>.
+    </p>
+
+    <p style="margin: 0 0 20px;">
+        Si vous recevez ce message correctement,
+        cela signifie que l'ensemble de la chaîne d'envoi
+        fonctionne :
+    </p>
+
+    <ul style="
+        margin: 0 0 24px;
+        padding-left: 20px;
+    ">
+        <li>Symfony Mailer</li>
+        <li>API Brevo</li>
+        <li>Twig</li>
+        <li>Template HTML</li>
+        <li>Service d'envoi d'email</li>
+    </ul>
+
+    <p style="
+        margin: 24px 0 0;
+        color: #6b7280;
+        font-size: 13px;
+    ">
+        Email généré le {{ "now"|date("d/m/Y à H:i:s") }}.
+    </p>
+
+{% endblock %}
