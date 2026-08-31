@@ -45,6 +45,7 @@ security:
         - { path: ^/api/contexts, roles: PUBLIC_ACCESS }
 
         # Gestion des utilisateurs uniquement pour les admins
+        - { path: ^/api/admin/users, roles: ROLE_ADMIN }
         - { path: ^/api/users, roles: ROLE_ADMIN }
 
         # Tout le reste nécessite un JWT
