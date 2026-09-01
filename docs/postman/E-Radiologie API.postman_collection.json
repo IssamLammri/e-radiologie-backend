@@ -1,0 +1,1016 @@
+{
+	"info": {
+		"_postman_id": "6ec041cb-be86-4040-b057-e93fc2c8bb5f",
+		"name": "E-Radiologie API",
+		"description": "Collection complète pour l'authentification, le profil utilisateur, l'administration des utilisateurs et le module des cas cliniques. Les requêtes de création enregistrent automatiquement les identifiants utiles dans les variables de la collection.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14025377"
+	},
+	"item": [
+		{
+			"name": "01 - Authentification",
+			"item": [
+				{
+					"name": "Connexion utilisateur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Connexion réussie', function () { pm.response.to.have.status(200); });",
+									"if (pm.response.code === 200) {",
+									"  const response = pm.response.json();",
+									"  if (response.token) {",
+									"    pm.collectionVariables.set('user_token', response.token);",
+									"    pm.environment.set('user_token', response.token);",
+									"  }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login_check",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login_check"
+							]
+						},
+						"description": "Enregistre automatiquement le JWT reçu dans `user_token`."
+					},
+					"response": []
+				},
+				{
+					"name": "Connexion administrateur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Connexion administrateur réussie', function () { pm.response.to.have.status(200); });",
+									"if (pm.response.code === 200) {",
+									"  const response = pm.response.json();",
+									"  if (response.token) {",
+									"    pm.collectionVariables.set('admin_token', response.token);",
+									"    pm.environment.set('admin_token', response.token);",
+									"  }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login_check",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login_check"
+							]
+						},
+						"description": "Enregistre automatiquement le JWT reçu dans `admin_token`."
+					},
+					"response": []
+				},
+				{
+					"name": "Mot de passe oublié",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{user_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Réinitialiser le mot de passe",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{reset_token}}\",\n  \"password\": \"nouveauPassword123\",\n  \"passwordConfirmation\": \"nouveauPassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Connexion et réinitialisation du mot de passe."
+		},
+		{
+			"name": "02 - Mon profil",
+			"item": [
+				{
+					"name": "Récupérer mon profil",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier mon profil",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"{{user_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Tous les champs sont optionnels. Si l'email change, reconnecter l'utilisateur."
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier mon mot de passe",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"{{user_password}}\",\n  \"newPassword\": \"nouveauPassword123\",\n  \"passwordConfirmation\": \"nouveauPassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/me/password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me",
+								"password"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Exécuter d'abord la requête Connexion utilisateur.",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{user_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "03 - Administration des utilisateurs",
+			"item": [
+				{
+					"name": "Lister les utilisateurs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users?page=1&limit=20&search=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Recherche dans l'email, le prénom et le nom."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer un utilisateur",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Créer un utilisateur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Utilisateur créé', function () { pm.response.to.have.status(201); });",
+									"if (pm.response.code === 201) {",
+									"  const response = pm.response.json();",
+									"  if (response.user && response.user.id) {",
+									"    pm.collectionVariables.set('user_id', response.user.id);",
+									"    pm.environment.set('user_id', response.user.id);",
+									"  }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"firstName\": \"Postman\",\n  \"lastName\": \"User\",\n  \"roles\": [\"ROLE_USER\"],\n  \"password\": \"password123\",\n  \"passwordConfirmation\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
+						},
+						"description": "Enregistre automatiquement l'identifiant créé dans `user_id`. Pour créer un administrateur, ajouter ROLE_ADMIN dans roles."
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier un utilisateur",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Postman modifié\",\n  \"lastName\": \"User\",\n   \"email\": \"{{user_email}}\",\n  \"roles\": [\"ROLE_USER\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Tous les champs sont optionnels. Utiliser [ROLE_USER, ROLE_ADMIN] pour promouvoir le compte."
+					},
+					"response": []
+				},
+				{
+					"name": "Promouvoir en administrateur",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roles\": [\"ROLE_USER\", \"ROLE_ADMIN\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Changer le mot de passe d'un utilisateur",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newPassword\": \"nouveauPassword123\",\n  \"passwordConfirmation\": \"nouveauPassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/{{user_id}}/password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"{{user_id}}",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer un utilisateur",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Utilisateur supprimé', function () { pm.response.to.have.status(204); });"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Attention : supprime définitivement l'utilisateur désigné par `user_id`."
+					},
+					"response": []
+				}
+			],
+			"description": "Exécuter d'abord la requête Connexion administrateur. Toutes ces routes nécessitent ROLE_ADMIN.",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{admin_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "04 - Cas cliniques publics",
+			"item": [
+				{
+					"name": "Lister les cas publiés",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cases?page=1&limit=20&search=&modality=&category=&difficulty=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "search", "value": "", "description": "Recherche dans le titre, le contexte clinique et le diagnostic." },
+								{ "key": "modality", "value": "", "description": "Identifiant de modalité, par exemple {{modality_id}}." },
+								{ "key": "category", "value": "", "description": "Identifiant de catégorie, par exemple {{category_id}}." },
+								{ "key": "difficulty", "value": "", "description": "BEGINNER, INTERMEDIATE ou ADVANCED." }
+							]
+						},
+						"description": "Retourne uniquement les cas au statut PUBLISHED."
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer les 3 cas récents",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/cases/recent", "host": ["{{base_url}}"], "path": ["api", "cases", "recent"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer un cas publié par slug",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/cases/{{radiology_case_slug}}", "host": ["{{base_url}}"], "path": ["api", "cases", "{{radiology_case_slug}}"] },
+						"description": "Retourne 404 pour un brouillon, un cas archivé ou un slug inconnu."
+					},
+					"response": []
+				},
+				{
+					"name": "Lister les modalités actives",
+					"event": [{
+						"listen": "test",
+						"script": {
+							"type": "text/javascript",
+							"exec": [
+								"if (pm.response.code === 200) {",
+								"  const response = pm.response.json();",
+								"  if (response.items && response.items.length) pm.collectionVariables.set('modality_id', response.items[0].id);",
+								"}"
+							]
+						}
+					}],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/imaging-modalities", "host": ["{{base_url}}"], "path": ["api", "imaging-modalities"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Lister les catégories actives",
+					"event": [{
+						"listen": "test",
+						"script": {
+							"type": "text/javascript",
+							"exec": [
+								"if (pm.response.code === 200) {",
+								"  const response = pm.response.json();",
+								"  if (response.items && response.items.length) pm.collectionVariables.set('category_id', response.items[0].id);",
+								"}"
+							]
+						}
+					}],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/case-categories", "host": ["{{base_url}}"], "path": ["api", "case-categories"] }
+					},
+					"response": []
+				}
+			],
+			"description": "Routes publiques : aucun JWT requis et seuls les cas publiés sont exposés."
+		},
+		{
+			"name": "05 - Administration des référentiels",
+			"item": [
+				{
+					"name": "Modalités d'imagerie",
+					"item": [
+						{
+							"name": "Lister les modalités",
+							"request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/admin/imaging-modalities", "host": ["{{base_url}}"], "path": ["api", "admin", "imaging-modalities"] } },
+							"response": []
+						},
+						{
+							"name": "Récupérer une modalité",
+							"request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/admin/imaging-modalities/{{modality_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "imaging-modalities", "{{modality_id}}"] } },
+							"response": []
+						},
+						{
+							"name": "Créer une modalité",
+							"event": [{
+								"listen": "test",
+								"script": {
+									"type": "text/javascript",
+									"exec": [
+										"pm.test('Modalité créée', function () { pm.response.to.have.status(201); });",
+										"if (pm.response.code === 201) {",
+										"  const response = pm.response.json();",
+										"  pm.collectionVariables.set('modality_id', response.id);",
+										"  pm.environment.set('modality_id', response.id);",
+										"}"
+									]
+								}
+							}],
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Content-Type", "value": "application/json" }],
+								"body": { "mode": "raw", "raw": "{\n  \"name\": \"Imagerie interventionnelle Postman\",\n  \"code\": \"INTERVENTIONAL_POSTMAN\",\n  \"active\": true,\n  \"position\": 90\n}", "options": { "raw": { "language": "json" } } },
+								"url": { "raw": "{{base_url}}/api/admin/imaging-modalities", "host": ["{{base_url}}"], "path": ["api", "admin", "imaging-modalities"] }
+							},
+							"response": []
+						},
+						{
+							"name": "Modifier une modalité",
+							"request": {
+								"method": "PATCH",
+								"header": [{ "key": "Content-Type", "value": "application/json" }],
+								"body": { "mode": "raw", "raw": "{\n  \"name\": \"Imagerie interventionnelle modifiée\",\n  \"active\": true,\n  \"position\": 95\n}", "options": { "raw": { "language": "json" } } },
+								"url": { "raw": "{{base_url}}/api/admin/imaging-modalities/{{modality_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "imaging-modalities", "{{modality_id}}"] }
+							},
+							"response": []
+						},
+						{
+							"name": "Supprimer une modalité",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": { "raw": "{{base_url}}/api/admin/imaging-modalities/{{modality_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "imaging-modalities", "{{modality_id}}"] },
+								"description": "Retourne 409 si la modalité est utilisée par un cas clinique."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Catégories de cas",
+					"item": [
+						{
+							"name": "Lister les catégories",
+							"request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/admin/case-categories", "host": ["{{base_url}}"], "path": ["api", "admin", "case-categories"] } },
+							"response": []
+						},
+						{
+							"name": "Récupérer une catégorie",
+							"request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/admin/case-categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "case-categories", "{{category_id}}"] } },
+							"response": []
+						},
+						{
+							"name": "Créer une catégorie",
+							"event": [{
+								"listen": "test",
+								"script": {
+									"type": "text/javascript",
+									"exec": [
+										"pm.test('Catégorie créée', function () { pm.response.to.have.status(201); });",
+										"if (pm.response.code === 201) {",
+										"  const response = pm.response.json();",
+										"  pm.collectionVariables.set('category_id', response.id);",
+										"  pm.environment.set('category_id', response.id);",
+										"}"
+									]
+								}
+							}],
+							"request": {
+								"method": "POST",
+								"header": [{ "key": "Content-Type", "value": "application/json" }],
+								"body": { "mode": "raw", "raw": "{\n  \"name\": \"Imagerie urologique Postman\",\n  \"description\": \"Catégorie créée depuis la collection Postman.\",\n  \"active\": true,\n  \"position\": 90\n}", "options": { "raw": { "language": "json" } } },
+								"url": { "raw": "{{base_url}}/api/admin/case-categories", "host": ["{{base_url}}"], "path": ["api", "admin", "case-categories"] }
+							},
+							"response": []
+						},
+						{
+							"name": "Modifier une catégorie",
+							"request": {
+								"method": "PATCH",
+								"header": [{ "key": "Content-Type", "value": "application/json" }],
+								"body": { "mode": "raw", "raw": "{\n  \"name\": \"Imagerie urologique modifiée\",\n  \"description\": \"Description mise à jour.\",\n  \"position\": 95\n}", "options": { "raw": { "language": "json" } } },
+								"url": { "raw": "{{base_url}}/api/admin/case-categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "case-categories", "{{category_id}}"] }
+							},
+							"response": []
+						},
+						{
+							"name": "Supprimer une catégorie",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": { "raw": "{{base_url}}/api/admin/case-categories/{{category_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "case-categories", "{{category_id}}"] },
+								"description": "Retourne 409 si la catégorie est utilisée par un cas clinique."
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "CRUD des modalités et catégories. Exécuter d'abord la connexion administrateur.",
+			"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }
+		},
+		{
+			"name": "06 - Administration des cas cliniques",
+			"item": [
+				{
+					"name": "Lister les cas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/radiology-cases?page=1&limit=20&search=&modality=&category=&difficulty=&status=&author=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "radiology-cases"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" },
+								{ "key": "search", "value": "" },
+								{ "key": "modality", "value": "" },
+								{ "key": "category", "value": "" },
+								{ "key": "difficulty", "value": "", "description": "BEGINNER, INTERMEDIATE ou ADVANCED." },
+								{ "key": "status", "value": "", "description": "DRAFT, PENDING_VALIDATION, PUBLISHED ou ARCHIVED." },
+								{ "key": "author", "value": "", "description": "Identifiant User de l'auteur." }
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Récupérer un cas",
+					"request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/admin/radiology-cases/{{radiology_case_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "radiology-cases", "{{radiology_case_id}}"] } },
+					"response": []
+				},
+				{
+					"name": "Créer un cas brouillon",
+					"event": [{
+						"listen": "test",
+						"script": {
+							"type": "text/javascript",
+							"exec": [
+								"pm.test('Cas clinique créé', function () { pm.response.to.have.status(201); });",
+								"if (pm.response.code === 201) {",
+								"  const response = pm.response.json();",
+								"  pm.collectionVariables.set('radiology_case_id', response.id);",
+								"  pm.collectionVariables.set('radiology_case_slug', response.slug);",
+								"  pm.environment.set('radiology_case_id', response.id);",
+								"  pm.environment.set('radiology_case_slug', response.slug);",
+								"}"
+							]
+						}
+					}],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Pneumonie lobaire franche aiguë - Postman\",\n  \"modalityId\": {{modality_id}},\n  \"categoryId\": {{category_id}},\n  \"difficulty\": \"BEGINNER\",\n  \"patientGender\": \"MALE\",\n  \"patientAge\": 45,\n  \"clinicalContext\": \"Fièvre à 39°C, toux grasse et douleur basithoracique droite.\",\n  \"trainingInstruction\": \"Examinez le cas et rédigez votre description.\",\n  \"trainingPlaceholder\": \"Exemple : opacité homogène systématisée...\",\n  \"expertDescription\": \"Opacité alvéolaire systématisée avec bronchogramme aérien.\",\n  \"diagnosis\": \"Pneumonie lobaire inférieure droite.\",\n  \"globalDiscussion\": \"Aspect typique d'une pneumonie bactérienne.\",\n  \"authorId\": {{user_id}},\n  \"status\": \"DRAFT\",\n  \"media\": [\n    {\n      \"path\": \"/uploads/cases/pneumonie-face.jpg\",\n      \"mediaType\": \"IMAGE\",\n      \"title\": \"Radiographie de face\",\n      \"caption\": \"Cliché thoracique de face\",\n      \"altText\": \"Radiographie thoracique de face\",\n      \"position\": 0,\n      \"isPrimary\": true\n    },\n    {\n      \"path\": \"/uploads/cases/pneumonie-profil.jpg\",\n      \"mediaType\": \"IMAGE\",\n      \"title\": \"Radiographie de profil\",\n      \"position\": 1,\n      \"isPrimary\": false\n    }\n  ],\n  \"references\": [\n    {\n      \"title\": \"Collège des Enseignants de Radiologie de France\",\n      \"source\": \"CERF\",\n      \"url\": \"https://www.cerf.fr\",\n      \"position\": 0\n    }\n  ]\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/admin/radiology-cases", "host": ["{{base_url}}"], "path": ["api", "admin", "radiology-cases"] },
+						"description": "Utilise les variables modality_id, category_id et user_id, puis enregistre automatiquement l'id et le slug du cas."
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier un cas",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n  \"difficulty\": \"INTERMEDIATE\",\n  \"clinicalContext\": \"Contexte clinique mis à jour depuis Postman.\",\n  \"globalDiscussion\": \"Discussion pédagogique mise à jour.\"\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{base_url}}/api/admin/radiology-cases/{{radiology_case_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "radiology-cases", "{{radiology_case_id}}"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Publier un cas",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/admin/radiology-cases/{{radiology_case_id}}/publish", "host": ["{{base_url}}"], "path": ["api", "admin", "radiology-cases", "{{radiology_case_id}}", "publish"] },
+						"description": "Le cas doit posséder au moins un média, un diagnostic et une description experte."
+					},
+					"response": []
+				},
+				{
+					"name": "Archiver un cas",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/admin/radiology-cases/{{radiology_case_id}}/archive", "host": ["{{base_url}}"], "path": ["api", "admin", "radiology-cases", "{{radiology_case_id}}", "archive"] }
+					},
+					"response": []
+				},
+				{
+					"name": "Supprimer un cas",
+					"event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Cas clinique supprimé', function () { pm.response.to.have.status(204); });"] } }],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "{{base_url}}/api/admin/radiology-cases/{{radiology_case_id}}", "host": ["{{base_url}}"], "path": ["api", "admin", "radiology-cases", "{{radiology_case_id}}"] },
+						"description": "Supprime le cas ainsi que ses médias et références."
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD complet des cas cliniques. Exécuter d'abord la connexion administrateur et disposer d'un user_id auteur valide.",
+			"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }] }
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:18740",
+			"type": "string"
+		},
+		{
+			"key": "user_email",
+			"value": "user@example.com",
+			"type": "string"
+		},
+		{
+			"key": "user_password",
+			"value": "password123",
+			"type": "string"
+		},
+		{
+			"key": "user_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_email",
+			"value": "admin@example.com",
+			"type": "string"
+		},
+		{
+			"key": "admin_password",
+			"value": "password123",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "reset_token",
+			"value": "COLLER_LE_TOKEN_RECU_PAR_EMAIL",
+			"type": "string"
+		},
+		{
+			"key": "modality_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "category_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "radiology_case_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "radiology_case_slug",
+			"value": "pneumonie-lobaire-franche-aigue-postman",
+			"type": "string"
+		}
+	]
+}

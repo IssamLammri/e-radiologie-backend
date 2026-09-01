@@ -44,6 +44,11 @@ security:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api/contexts, roles: PUBLIC_ACCESS }
 
+        # Consultation publique des cas cliniques et de leurs référentiels
+        - { path: ^/api/cases(?:/|$), roles: PUBLIC_ACCESS }
+        - { path: ^/api/imaging-modalities$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/case-categories$, roles: PUBLIC_ACCESS }
+
         # Gestion des utilisateurs uniquement pour les admins
         - { path: ^/api/admin/users, roles: ROLE_ADMIN }
         - { path: ^/api/users, roles: ROLE_ADMIN }
