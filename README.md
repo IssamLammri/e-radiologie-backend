@@ -4,6 +4,8 @@ Backend de l'application **e-Radiologie**.
 
 La spécification JSON des endpoints de profil et d'administration des utilisateurs est disponible dans [docs/USER_API.md](docs/USER_API.md).
 
+La collection Postman et l'environnement local sont disponibles dans [docs/postman](docs/postman).
+
 Le projet fonctionne avec :
 
 - PHP / Symfony
