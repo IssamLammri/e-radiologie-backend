@@ -619,16 +619,16 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/cases?page=1&limit=20&search=&modality=&category=&difficulty=",
+							"raw": "{{base_url}}/api/cases?page=1&limit=20",
 							"host": ["{{base_url}}"],
 							"path": ["api", "cases"],
 							"query": [
 								{ "key": "page", "value": "1" },
 								{ "key": "limit", "value": "20" },
-								{ "key": "search", "value": "", "description": "Recherche dans le titre, le contexte clinique et le diagnostic." },
-								{ "key": "modality", "value": "", "description": "Identifiant de modalité, par exemple {{modality_id}}." },
-								{ "key": "category", "value": "", "description": "Identifiant de catégorie, par exemple {{category_id}}." },
-								{ "key": "difficulty", "value": "", "description": "BEGINNER, INTERMEDIATE ou ADVANCED." }
+								{ "key": "search", "value": "", "description": "Recherche dans le titre, le contexte clinique et le diagnostic.", "disabled": true },
+								{ "key": "modality", "value": "{{modality_id}}", "description": "Identifiant de modalité.", "disabled": true },
+								{ "key": "category", "value": "{{category_id}}", "description": "Identifiant de catégorie.", "disabled": true },
+								{ "key": "difficulty", "value": "BEGINNER", "description": "BEGINNER, INTERMEDIATE ou ADVANCED.", "disabled": true }
 							]
 						},
 						"description": "Retourne uniquement les cas au statut PUBLISHED."
@@ -837,18 +837,18 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/admin/radiology-cases?page=1&limit=20&search=&modality=&category=&difficulty=&status=&author=",
+							"raw": "{{base_url}}/api/admin/radiology-cases?page=1&limit=20",
 							"host": ["{{base_url}}"],
 							"path": ["api", "admin", "radiology-cases"],
 							"query": [
 								{ "key": "page", "value": "1" },
 								{ "key": "limit", "value": "20" },
-								{ "key": "search", "value": "" },
-								{ "key": "modality", "value": "" },
-								{ "key": "category", "value": "" },
-								{ "key": "difficulty", "value": "", "description": "BEGINNER, INTERMEDIATE ou ADVANCED." },
-								{ "key": "status", "value": "", "description": "DRAFT, PENDING_VALIDATION, PUBLISHED ou ARCHIVED." },
-								{ "key": "author", "value": "", "description": "Identifiant User de l'auteur." }
+								{ "key": "search", "value": "", "disabled": true },
+								{ "key": "modality", "value": "{{modality_id}}", "disabled": true },
+								{ "key": "category", "value": "{{category_id}}", "disabled": true },
+								{ "key": "difficulty", "value": "BEGINNER", "description": "BEGINNER, INTERMEDIATE ou ADVANCED.", "disabled": true },
+								{ "key": "status", "value": "DRAFT", "description": "DRAFT, PENDING_VALIDATION, PUBLISHED ou ARCHIVED.", "disabled": true },
+								{ "key": "author", "value": "{{user_id}}", "description": "Identifiant User de l'auteur.", "disabled": true }
 							]
 						}
 					},
