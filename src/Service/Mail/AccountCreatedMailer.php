@@ -15,16 +15,21 @@ final class AccountCreatedMailer
     ) {
     }
 
-    public function send(User $user): void
+    public function send(User $user, string $token): void
     {
+        $resetUrl = sprintf(
+            '%s/reset-password?token=%s',
+            rtrim($this->frontendUrl, '/'),
+            urlencode($token)
+        );
+
         $this->mailService->send(
             to: $user->getEmail(),
             subject: 'Bienvenue sur e-Radiologie',
             template: 'emails/account_created.html.twig',
             context: [
                 'user' => $user,
-                'loginUrl' =>
-                    rtrim($this->frontendUrl, '/') . '/login',
+                'resetUrl' => $resetUrl,
             ]
         );
     }
