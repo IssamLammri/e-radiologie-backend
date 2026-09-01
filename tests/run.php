@@ -11,6 +11,9 @@ use App\Entity\User;
 use App\Enum\CaseDifficulty;
 use App\Enum\PatientGender;
 use App\Enum\RadiologyCaseStatus;
+use App\Controller\AdminRadiologyCaseController;
+use App\Controller\PublicRadiologyCaseController;
+use Symfony\Component\HttpFoundation\Request;
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
@@ -56,6 +59,12 @@ ensure($case->getModality() === $modality && $case->getCategory() === $category,
 $case->setStatus(RadiologyCaseStatus::PUBLISHED);
 ensure($case->getPublishedAt() instanceof DateTimeImmutable, 'La publication doit renseigner publishedAt.');
 ensure(CaseDifficulty::BEGINNER->label() === 'Débutant', 'Le libellé français du niveau doit être exposé.');
+
+$requestWithEmptyFilters = Request::create('/api/cases?modality=&category=');
+foreach ([new PublicRadiologyCaseController(), new AdminRadiologyCaseController()] as $controller) {
+    $positiveId = new ReflectionMethod($controller, 'positiveId');
+    ensure($positiveId->invoke($controller, $requestWithEmptyFilters, 'modality') === null, 'Un filtre numérique vide doit être considéré comme absent.');
+}
 
 $case->initializeTimestamps();
 ensure($case->getCreatedAt() instanceof DateTimeImmutable && $case->getUpdatedAt() instanceof DateTimeImmutable, 'Les timestamps doivent être initialisés.');

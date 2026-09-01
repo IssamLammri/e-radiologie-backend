@@ -82,7 +82,16 @@ final class PublicRadiologyCaseController extends AbstractController
 
     private function positiveId(Request $request, string $name): ?int
     {
-        $value = $request->query->getInt($name, 0);
-        return $value > 0 ? $value : null;
+        $value = $request->query->get($name);
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $id = filter_var($value, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+            'flags' => FILTER_NULL_ON_FAILURE,
+        ]);
+
+        return $id;
     }
 }
