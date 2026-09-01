@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\Mail\AccountCreatedMailer;
+use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
 #[Route('/api/admin/users')]
 #[IsGranted('ROLE_ADMIN')]
@@ -47,6 +49,8 @@ final class AdminUserController extends AbstractController
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
+        ResetPasswordHelperInterface $resetPasswordHelper,
+        AccountCreatedMailer $accountCreatedMailer,
     ): JsonResponse {
         $data = $request->toArray();
         $validation = $this->validateProfileData($data, $userRepository, null, true);
@@ -59,10 +63,15 @@ final class AdminUserController extends AbstractController
         $passwordConfirmation = is_string($data['passwordConfirmation'] ?? null)
             ? $data['passwordConfirmation']
             : '';
-        $errors = $this->validatePassword($password, $passwordConfirmation);
-
-        if ($errors !== []) {
-            return $this->validationError($errors);
+            
+        if ($password !== '' || $passwordConfirmation !== '') {
+            $errors = $this->validatePassword($password, $passwordConfirmation);
+            if ($errors !== []) {
+                return $this->validationError($errors);
+            }
+        } else {
+            // Générer un mot de passe aléatoire très fort car l'utilisateur va le réinitialiser
+            $password = bin2hex(random_bytes(32));
         }
 
         $user = (new User())
@@ -74,6 +83,9 @@ final class AdminUserController extends AbstractController
 
         $entityManager->persist($user);
         $entityManager->flush();
+        
+        $resetToken = $resetPasswordHelper->generateResetToken($user);
+        $accountCreatedMailer->send($user, $resetToken->getToken());
 
         return $this->json([
             'message' => 'Utilisateur créé avec succès.',
