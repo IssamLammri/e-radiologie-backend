@@ -26,29 +26,8 @@ jobs:
                       echo "Pull latest master..."
                       git pull origin master
 
-                      echo "Build and start containers..."
-                      docker compose up -d --build
-
-                      echo "Install Composer dependencies..."
-                      docker exec e_radiologie_backend_php composer install \
-                          --no-dev \
-                          --optimize-autoloader \
-                          --no-interaction
-
-                      echo "Run database migrations..."
-                      docker exec e_radiologie_backend_php php bin/console \
-                          doctrine:migrations:migrate \
-                          --no-interaction \
-                          --env=prod
-
-                      echo "Clear Symfony cache..."
-                      docker exec e_radiologie_backend_php php bin/console \
-                          cache:clear \
-                          --env=prod
-
-                      echo "Warm Symfony cache..."
-                      docker exec e_radiologie_backend_php php bin/console \
-                          cache:warmup \
-                          --env=prod
+                      echo "Build and start using server .env.local..."
+                      test -f .env.local
+                      docker compose --env-file .env.local up -d --build --wait --wait-timeout 300
 
                       echo "Deployment completed."

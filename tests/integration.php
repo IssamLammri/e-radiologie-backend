@@ -12,6 +12,7 @@ use App\Enum\RadiologyCaseStatus;
 use App\Kernel;
 use App\Repository\RadiologyCaseRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -50,12 +51,25 @@ try {
     $publishedRecent = buildCase("Publié récent $suffix", "publie-recent-$suffix", $author, $modality, $category)
         ->setPublishedAt(new DateTimeImmutable('2100-01-02 10:00:00'))
         ->setStatus(RadiologyCaseStatus::PUBLISHED);
+    $publishedRecent->addMedia((new CaseMedia())->setPath('/test/secondary-1.jpg'));
+    $publishedRecent->addMedia((new CaseMedia())->setPath('/test/secondary-2.jpg'));
 
     $entityManager->persist($author);
     $entityManager->persist($draft);
     $entityManager->persist($publishedOld);
     $entityManager->persist($publishedRecent);
     $entityManager->flush();
+
+    integrationEnsure((int) $connection->fetchOne('SELECT COUNT(*) FROM case_media WHERE radiology_case_id = ?', [$publishedRecent->getId()]) === 3, 'MySQL doit accepter plusieurs médias secondaires pour un cas.');
+    try {
+        $connection->executeStatement(
+            "INSERT INTO case_media (radiology_case_id, path, media_type, position, is_primary, created_at, updated_at) VALUES (?, '/test/duplicate.jpg', 'IMAGE', 0, 1, NOW(), NOW())",
+            [$publishedRecent->getId()]
+        );
+        throw new RuntimeException('MySQL doit refuser un deuxième média principal pour le même cas.');
+    } catch (UniqueConstraintViolationException) {
+        // The generated column preserves PostgreSQL's former partial unique index.
+    }
 
     integrationEnsure($repository->findPublishedBySlug($draft->getSlug()) === null, 'Un brouillon ne doit pas être exposé publiquement.');
     integrationEnsure($repository->findPublishedBySlug($publishedRecent->getSlug()) === $publishedRecent, 'Un cas publié doit être exposé.');
@@ -71,7 +85,7 @@ try {
     integrationEnsure($draftResponse->getStatusCode() === 404, 'La route publique doit masquer le brouillon.');
     integrationEnsure($adminResponse->getStatusCode() === 401, 'Le CRUD administrateur doit exiger une authentification.');
 
-    fwrite(STDOUT, "Tests d’intégration PostgreSQL/API : OK\n");
+    fwrite(STDOUT, "Tests d’intégration MySQL/API : OK\n");
 } finally {
     if ($connection->isTransactionActive()) { $connection->rollBack(); }
     $kernel->shutdown();

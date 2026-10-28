@@ -7,7 +7,7 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "api-platform/core": "^4.3",
+        "api-platform/core": "^4.4.6",
         "api-platform/doctrine-orm": "^4.3",
         "api-platform/symfony": "^4.3",
         "doctrine/doctrine-bundle": "^3.2",
@@ -24,6 +24,7 @@
         "symfony/expression-language": "7.4.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.4.*",
+        "symfony/html-sanitizer": "7.4.*",
         "symfony/http-client": "7.4.*",
         "symfony/mailer": "7.4.*",
         "symfony/maker-bundle": "^1.67",
@@ -78,7 +79,8 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "test:v1": "php tests/v1_api.php"
     },
     "conflict": {
         "symfony/symfony": "*"

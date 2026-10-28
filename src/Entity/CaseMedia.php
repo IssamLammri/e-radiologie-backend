@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CaseMediaRepository::class)]
 #[ORM\Table(name: 'case_media')]
-#[ORM\UniqueConstraint(name: 'uniq_case_primary_media', columns: ['radiology_case_id'], options: ['where' => '(is_primary = true)'])]
+#[ORM\UniqueConstraint(name: 'uniq_case_primary_media', columns: ['primary_case_id'])]
 #[ORM\HasLifecycleCallbacks]
 class CaseMedia
 {
@@ -50,6 +50,10 @@ class CaseMedia
 
     #[ORM\Column(options: ['default' => false])]
     private bool $isPrimary = false;
+
+    // Only primary images reserve the case ID; the unique index permits several NULLs.
+    #[ORM\Column(nullable: true, insertable: false, updatable: false, generated: 'ALWAYS', columnDefinition: 'INT GENERATED ALWAYS AS (CASE WHEN is_primary THEN radiology_case_id ELSE NULL END) VIRTUAL')]
+    private ?int $primaryCaseId = null;
 
     public function getId(): ?int { return $this->id; }
     public function getRadiologyCase(): ?RadiologyCase { return $this->radiologyCase; }

@@ -1,4 +1,4 @@
-DC = docker compose
+DC = docker compose --env-file .env.local
 PHP = $(DC) exec php
 PHP_RUN = $(DC) run --rm php
 CONSOLE = $(PHP) php bin/console
@@ -28,7 +28,7 @@ build: ## Construit les images Docker
 	$(DC) build
 
 start: ## Démarre tous les conteneurs
-	$(DC) up -d
+	$(DC) up -d --build --wait --wait-timeout 300
 
 stop: ## Arrête les conteneurs
 	$(DC) stop
@@ -47,16 +47,11 @@ ps: ## Affiche l'état des conteneurs
 logs: ## Affiche les logs
 	$(DC) logs -f
 
-db-start: ## Démarre uniquement PostgreSQL
+db-start: ## Démarre uniquement MySQL
 	$(DC) up -d database
 
-db-wait: ## Attend que PostgreSQL soit disponible
-	@echo "Attente de PostgreSQL..."
-	@until $(DC) exec -T database sh -c 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' > /dev/null 2>&1; do \
-		echo "PostgreSQL n'est pas encore prêt..."; \
-		sleep 2; \
-	done
-	@echo "PostgreSQL est prêt."
+db-wait: ## Attend que MySQL soit disponible
+	$(DC) up -d --wait database
 
 composer-install: ## Installe les dépendances Composer
 	$(PHP_RUN) composer install

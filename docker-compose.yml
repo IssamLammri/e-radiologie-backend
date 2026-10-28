@@ -1,27 +1,64 @@
+name: e-radiologie-local
+
 services:
     php:
         build: .
         container_name: e_radiologie_backend_php
+        init: true
+        user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
         ports:
-            - "18740:8000"
+            - "127.0.0.1:18740:8000"
         volumes:
             - .:/app
+            - ./docker/local.ini:/usr/local/etc/php/conf.d/zz-local.ini:ro
         working_dir: /app
+        env_file:
+            - .env.local
+        environment:
+            COMPOSER_HOME: /tmp/composer
         depends_on:
-            - database
-        command: php -S 0.0.0.0:8000 -t public
+            database:
+                condition: service_healthy
+        command: ["sh", "docker/start-local.sh"]
+        healthcheck:
+            test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/api/cases') === false ? 1 : 0);"]
+            interval: 10s
+            timeout: 5s
+            retries: 12
+            start_period: 120s
 
     database:
-        image: postgres:16
-        container_name: e_radiologie_backend_postgres
+        image: mysql:8.4
+        container_name: e_radiologie_backend_mysql
         ports:
-            - "15432:5432"
+            - "127.0.0.1:13306:3306"
         environment:
-            POSTGRES_DB: ${POSTGRES_DB}
-            POSTGRES_USER: ${POSTGRES_USER}
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:?Configurer MYSQL_DATABASE dans .env.local}
+            MYSQL_USER: ${MYSQL_USER:?Configurer MYSQL_USER dans .env.local}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Configurer MYSQL_PASSWORD dans .env.local}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configurer MYSQL_ROOT_PASSWORD dans .env.local}
         volumes:
-            - e_radiologie_backend_postgres_data:/var/lib/postgresql/data
+            - e_radiologie_mysql_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD-SHELL", "MYSQL_PWD=$$MYSQL_PASSWORD mysql -h 127.0.0.1 -u $$MYSQL_USER -D $$MYSQL_DATABASE -e 'SELECT 1' >/dev/null 2>&1"]
+            interval: 5s
+            timeout: 5s
+            retries: 30
+            start_period: 30s
+
+    phpmyadmin:
+        image: phpmyadmin:5.2
+        container_name: e_radiologie_phpmyadmin
+        ports:
+            - "127.0.0.1:18741:80"
+        environment:
+            PMA_HOST: database
+            PMA_PORT: 3306
+            PMA_ABSOLUTE_URI: ${PHPMYADMIN_URL:-}
+            UPLOAD_LIMIT: 64M
+        depends_on:
+            database:
+                condition: service_healthy
 
 volumes:
-    e_radiologie_backend_postgres_data:
+    e_radiologie_mysql_data:

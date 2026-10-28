@@ -1,296 +1,117 @@
 # e-Radiologie Backend
 
-Backend de l'application **e-Radiologie**.
+API Symfony / PHP 8.4, Doctrine ORM et MySQL 8.4.
 
-La spécification JSON des endpoints de profil et d'administration des utilisateurs est disponible dans [docs/USER_API.md](docs/USER_API.md).
+La spécification des endpoints utilisateurs est disponible dans
+[docs/USER_API.md](docs/USER_API.md), et la collection Postman dans
+[docs/postman](docs/postman).
 
-La collection Postman et l'environnement local sont disponibles dans [docs/postman](docs/postman).
+## Lancer les trois projets
 
-Le projet fonctionne avec :
+Depuis le dossier parent `E-RADIOLOGIE`, exécuter `make start`.
+Le [guide local commun](../README.md) décrit les ports, les comptes de test et
+les commandes pour le site client, le back-office et phpMyAdmin.
 
-- PHP / Symfony
-- PostgreSQL 16
-- Doctrine ORM
-- Doctrine Migrations
-- Docker
-- Docker Compose
+## Lancer seulement le backend et sa base
 
----
-
-## Prérequis
-
-Avant de démarrer le projet, installer :
-
-- Docker
-- Docker Compose
-- Make
-
-Vérifier les installations :
-
-```bash
-docker --version
-docker compose version
-make --version
-```
-
----
-
-## Installation
-
-### 1. Récupérer le projet
-
-```bash
-git clone <URL_DU_REPOSITORY>
-cd <NOM_DU_PROJET>
-```
-
-### 2. Configurer les variables d'environnement
-
-Vérifier que les variables PostgreSQL sont présentes dans le fichier `.env` ou `.env.local`.
-
-Exemple :
-
-```dotenv
-POSTGRES_DB=e_radiologie
-POSTGRES_USER=e_radiologie
-POSTGRES_PASSWORD=password
-```
-
-La connexion Doctrine doit utiliser le nom du service Docker `database` et le port interne PostgreSQL `5432`.
-
-Exemple :
-
-```dotenv
-DATABASE_URL="postgresql://e_radiologie:password@database:5432/e_radiologie?serverVersion=16&charset=utf8"
-```
-
-> Depuis les conteneurs Docker, PostgreSQL est accessible via `database:5432`.
->
-> Le port `15432` est uniquement utilisé pour accéder à PostgreSQL depuis la machine hôte.
-
----
-
-## Démarrage initial
-
-Pour installer complètement le projet :
-
-```bash
-make install
-```
-
-Cette commande effectue automatiquement :
-
-1. la construction des images Docker ;
-2. le démarrage de PostgreSQL ;
-3. l'attente de la disponibilité de PostgreSQL ;
-4. l'installation des dépendances Composer ;
-5. la création de la base de données si nécessaire ;
-6. l'exécution des migrations Doctrine ;
-7. le démarrage des conteneurs ;
-8. le nettoyage du cache Symfony.
-
-Une fois l'installation terminée, l'API est disponible à l'adresse :
-
-```text
-http://localhost:18740
-```
-
----
-
-## Démarrer le projet
-
-Pour les démarrages suivants :
+Prérequis : Docker, Docker Compose et Make.
 
 ```bash
 make start
-```
-
-Vérifier l'état des conteneurs :
-
-```bash
-make ps
-```
-
----
-
-## Arrêter le projet
-
-```bash
-make stop
-```
-
-Pour supprimer les conteneurs :
-
-```bash
-make down
-```
-
----
-
-## Redémarrer le projet
-
-```bash
-make restart
-```
-
----
-
-## Logs
-
-Afficher les logs de l'application :
-
-```bash
 make logs
 ```
 
-Quitter l'affichage des logs avec :
-
-```text
-Ctrl + C
-```
-
----
-
-## Symfony
-
-Afficher les commandes Symfony :
-
-```bash
-make console
-```
-
-Ouvrir un shell dans le conteneur PHP :
-
-```bash
-make shell
-```
-
-Il est ensuite possible d'utiliser directement :
-
-```bash
-php bin/console
-```
-
----
-
-## Base de données
-
-### Exécuter les migrations
-
-```bash
-make migrate
-```
-
-### Générer une migration
-
-Après une modification des entités Doctrine :
-
-```bash
-make migration
-```
-
-Puis appliquer la migration :
-
-```bash
-make migrate
-```
-
-### Réinitialiser complètement la base
-
-```bash
-make db-reset
-```
-
-Cette commande :
-
-- supprime la base existante ;
-- recrée la base ;
-- exécute toutes les migrations.
-
-> Attention : cette commande supprime toutes les données existantes.
-
----
-
-## Composer
-
-Les dépendances Composer sont automatiquement installées avec :
-
-```bash
-make install
-```
-
-Pour relancer manuellement l'installation :
-
-```bash
-make composer-install
-```
-
----
-
-## Cache Symfony
-
-Pour vider le cache :
-
-```bash
-make cache-clear
-```
-
----
-
-## Accès aux services
+Le conteneur PHP installe les dépendances Composer, génère les clés JWT si elles
+manquent, applique les migrations MySQL et crée les deux comptes de test locaux.
+Il démarre ensuite le serveur Symfony sur http://localhost:18740.
 
 | Service | Adresse |
 | --- | --- |
-| Backend Symfony | http://localhost:18740 |
-| PostgreSQL depuis Docker | `database:5432` |
-| PostgreSQL depuis la machine | `localhost:15432` |
+| API publique | http://localhost:18740/api/cases |
+| Documentation | http://localhost:18740/api/docs |
+| phpMyAdmin | http://localhost:18741 |
+| MySQL depuis Docker | `database:3306` |
+| MySQL depuis la machine | `127.0.0.1:13306` |
 
----
+phpMyAdmin : utilisateur `e_radiologie`, mot de passe `e_radiologie_local`,
+base `e_radiologie`. Les comptes applicatifs sont `admin@e-radiologie.test`
+et `client@e-radiologie.test`, avec le mot de passe `LocalTest123!`.
 
-## Commandes principales
+## Configuration
 
-Afficher toutes les commandes disponibles :
+Copier `.env.example` vers `.env.local` au premier clonage, puis renseigner les
+valeurs de la machine cible. Ce fichier est ignoré par Git. Compose le charge
+pour PHP et Make utilise `--env-file .env.local` pour les variables MySQL et
+phpMyAdmin. Aucune URL, configuration email ou clé JWT n'est imposée par Docker.
 
-```bash
-make
+```dotenv
+DATABASE_URL="mysql://e_radiologie:e_radiologie_local@database:3306/e_radiologie?serverVersion=8.4.0&charset=utf8mb4"
 ```
 
-ou :
+La configuration Docker est réservée au développement local. Les comptes de test
+ne sont créés que si `APP_ENV=dev` et `APP_LOCAL_SETUP=1`.
+
+En staging/production, utiliser `APP_ENV=prod`, `APP_DEBUG=0`, `APP_LOCAL_SETUP=0`,
+des secrets dédiés et les véritables URL dans `DEFAULT_URI` et `FRONTEND_URL`.
+Adapter `CORS_ALLOW_ORIGIN` aux domaines client et administrateur. Renseigner
+`PHPMYADMIN_URL` si phpMyAdmin est accessible derrière un proxy.
+
+Pour Brevo, définir `BREVO_API_KEY`,
+`MAILER_DSN=brevo+api://${BREVO_API_KEY}@default` et un `MAIL_FROM_EMAIL` autorisé.
+`MAILER_DSN=null://null` désactive les envois. Ne pas mettre de clé Brevo dans
+les variables publiques `VITE_*` des interfaces.
+
+Après modification, lancer `make start` (recréation des conteneurs concernés),
+ou `docker compose --env-file .env.local up -d --build --wait`.
+Le workflow de déploiement utilise cette même commande : dépendances, migrations
+et cache sont gérés dans le script de démarrage ; aucun compte local n'est créé
+en mode production. Le serveur PHP intégré reste destiné au développement et
+doit être remplacé par un serveur adapté pour une exposition en production.
+
+Les mots de passe `MYSQL_*` initialisent un volume neuf ; leur modification
+n'altère pas les comptes d'un volume existant. Maintenir `DATABASE_URL` cohérent
+avec les identifiants réellement configurés dans MySQL.
+
+## Migrations et données
+
+Les migrations actives se trouvent dans `migrations/mysql` et créent l'ensemble
+des tables ainsi que les modalités et catégories initiales. Les anciennes
+migrations PostgreSQL restent archivées dans `migrations` ; elles ne sont plus
+chargées par Doctrine. Une base PostgreSQL existante n'est pas convertie par ce
+processus. Aucun ancien volume PostgreSQL n'est supprimé.
+
+MySQL conserve la règle d'un seul média principal par cas grâce à une colonne
+générée et un index unique, tout en autorisant plusieurs médias secondaires.
 
 ```bash
-make help
-```
-
-Commandes courantes :
-
-```bash
-make install
-make start
-make stop
-make restart
-make logs
-make shell
-make migrate
-make migration
+make migrate       # appliquer les migrations
+make migration     # générer une migration après modification des entités
 make cache-clear
-make db-reset
+make shell
+make console
+make ps
+make stop
+make down          # conserver le volume MySQL
 ```
 
----
+`make db-reset` supprime toutes les données de la base locale. `make clean`
+supprime également le volume Docker MySQL.
 
-## Premier lancement
-
-En résumé, après avoir cloné le projet :
+## Vérification
 
 ```bash
-git clone <URL_DU_REPOSITORY>
-cd <NOM_DU_PROJET>
-
-make install
+docker compose --env-file .env.local exec -T php composer test
+docker compose --env-file .env.local exec -T php composer test:integration
+docker compose --env-file .env.local exec -T php php bin/console doctrine:schema:validate
 ```
 
-Puis ouvrir :
+Les tests d'intégration utilisent une transaction annulée à la fin. Ils vérifient
+notamment le catalogue public, la protection des routes administrateur et
+l'unicité du média principal dans MySQL.
 
-```text
-http://localhost:18740
-```
+## Modules V1
+
+Voir le [contrat API V1](docs/V1_API.md) pour les classifications, cours, planchages,
+examens, modèles et comptes rendus privés. La migration V1 est appliquée au
+démarrage Docker, en conservant les données déjà présentes. Les tests HTTP V1
+se lancent avec `docker compose --env-file .env.local exec -T php composer test:v1`.
