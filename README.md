@@ -56,6 +56,13 @@ des secrets dédiés et les véritables URL dans `DEFAULT_URI` et `FRONTEND_URL`
 Adapter `CORS_ALLOW_ORIGIN` aux domaines client et administrateur. Renseigner
 `PHPMYADMIN_URL` si phpMyAdmin est accessible derrière un proxy.
 
+Le fichier de production doit également contenir les quatre paramètres MySQL
+utilisés par l’image officielle pour initialiser une base neuve :
+`MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` et `MYSQL_ROOT_PASSWORD`.
+`DATABASE_URL` doit reprendre le même nom de base, utilisateur et mot de passe.
+Le workflow vérifie ces noms de variables avant de lancer Docker et n’affiche
+jamais leurs valeurs.
+
 Pour Brevo, définir `BREVO_API_KEY`,
 `MAILER_DSN=brevo+api://${BREVO_API_KEY}@default` et un `MAIL_FROM_EMAIL` autorisé.
 `MAILER_DSN=null://null` désactive les envois. Ne pas mettre de clé Brevo dans
@@ -71,6 +78,24 @@ doit être remplacé par un serveur adapté pour une exposition en production.
 Les mots de passe `MYSQL_*` initialisent un volume neuf ; leur modification
 n'altère pas les comptes d'un volume existant. Maintenir `DATABASE_URL` cohérent
 avec les identifiants réellement configurés dans MySQL.
+
+### Première installation d’une production vide
+
+`docker compose up --build` reconstruit déjà les images nécessaires. Il n’est
+pas nécessaire de supprimer toutes les images Docker. Si le volume MySQL de ce
+projet ne contient effectivement aucune donnée à conserver, la remise à zéro
+se limite à ce projet et à son volume :
+
+```bash
+cd ~/projets/e-radiologie-backend
+docker compose --env-file .env.local down --volumes --remove-orphans
+docker image prune -f
+docker compose --env-file .env.local up -d --build --wait --wait-timeout 300
+```
+
+La commande `down --volumes` supprime la base de données de ce projet. Elle ne
+doit être exécutée qu’après vérification du volume concerné ; elle ne supprime
+pas les images globales ni les autres projets Docker du serveur.
 
 ## Migrations et données
 
