@@ -9,10 +9,29 @@
 /var/
 /vendor/
 /public/uploads/editorial/
-.idea
-/.idea/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
 ###< symfony/framework-bundle ###
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+# Test and static-analysis caches
+/.phpunit.result.cache
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/.phpstan.cache/
+/phpstan.neon.local
+
+# Local tooling and reports
+/public/build/
+/public/.vite/
+/playwright-report/
+/test-results/
+*.log

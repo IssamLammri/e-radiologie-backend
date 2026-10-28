@@ -28,6 +28,20 @@ jobs:
 
                       echo "Build and start using server .env.local..."
                       test -f .env.local
+                      missing=""
+                      for key in APP_ENV APP_DEBUG APP_LOCAL_SETUP APP_SECRET DEFAULT_URI CORS_ALLOW_ORIGIN MYSQL_DATABASE MYSQL_USER MYSQL_PASSWORD MYSQL_ROOT_PASSWORD DATABASE_URL JWT_PASSPHRASE MAILER_DSN MAIL_FROM_EMAIL MAIL_FROM_NAME FRONTEND_URL; do
+                          if ! grep -Eq "^${key}=.+$" .env.local; then
+                              missing="${missing} ${key}"
+                          fi
+                      done
+                      if [ -n "$missing" ]; then
+                          echo "Variables manquantes ou vides dans .env.local :$missing"
+                          exit 1
+                      fi
+                      test "$(grep -E '^APP_ENV=' .env.local | tail -n 1 | cut -d= -f2-)" = "prod"
+                      test "$(grep -E '^APP_DEBUG=' .env.local | tail -n 1 | cut -d= -f2-)" = "0"
+                      test "$(grep -E '^APP_LOCAL_SETUP=' .env.local | tail -n 1 | cut -d= -f2-)" = "0"
+                      docker compose --env-file .env.local config --quiet
                       docker compose --env-file .env.local up -d --build --wait --wait-timeout 300
 
                       echo "Deployment completed."
