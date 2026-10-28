@@ -18,6 +18,7 @@ jobs:
                   host: ${{ secrets.VPS_HOST }}
                   username: ${{ secrets.VPS_USER }}
                   key: ${{ secrets.VPS_SSH_KEY }}
+                  command_timeout: 20m
                   script: |
                       set -e
 
@@ -41,7 +42,14 @@ jobs:
                       test "$(grep -E '^APP_ENV=' .env.local | tail -n 1 | cut -d= -f2-)" = "prod"
                       test "$(grep -E '^APP_DEBUG=' .env.local | tail -n 1 | cut -d= -f2-)" = "0"
                       test "$(grep -E '^APP_LOCAL_SETUP=' .env.local | tail -n 1 | cut -d= -f2-)" = "0"
+                      export LOCAL_UID="$(id -u)"
+                      export LOCAL_GID="$(id -g)"
                       docker compose --env-file .env.local config --quiet
-                      docker compose --env-file .env.local up -d --build --wait --wait-timeout 300
+                      if ! docker compose --env-file .env.local up -d --build --wait --wait-timeout 900; then
+                          echo "Backend startup failed. Showing service status and recent logs:"
+                          docker compose --env-file .env.local ps -a
+                          docker compose --env-file .env.local logs --no-color --tail=200 php
+                          exit 1
+                      fi
 
                       echo "Deployment completed."
